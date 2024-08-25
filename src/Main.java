@@ -206,6 +206,13 @@ class Statistics {
 
 public class Main {
     public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.println("Choose the types of data to analysis:\n" +
+                "0 - Rainfall only\n" +
+                "1 - Rainfall and Sunshine\n" +
+                "2 - Rainfall, Sunshine and Minimum Temperature\n" +
+                "3 - All data\n" +
+                "Enter your selection:");
 
     }
 }
