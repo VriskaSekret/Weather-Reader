@@ -1,5 +1,6 @@
 import java.util.*;
 import java.awt.*;
+import java.io.*;
 
 enum ClimateType{
     RAINFALL(new String[]{"Rainfall"}),
@@ -153,10 +154,54 @@ class Statistics {
     private String[] columnNames;
     private ClimateType climateType;
     public Statistics(ClimateType climateType){
+        this.regions = new ArrayList<>();
         this.climateType = climateType;
         this.columnNames = climateType.getColumnNames();
     }
-    public void process(String regionDataFileName){}
+    public void process(String regionDataFileName){
+        Scanner input = null;
+        try {
+            input = new Scanner(new File(regionDataFileName));
+            ArrayList<String> lines = new ArrayList<>();
+            while (input.hasNextLine()) {
+                lines.add(input.nextLine());
+            }
+            Region regionObj = new Region(regionDataFileName.substring(0, regionDataFileName.length()-4));
+            if (climateType == ClimateType.ALL) {
+                regionObj.process(lines.get(0), lines.get(1), lines.get(2), lines.get(3));
+            } else if (climateType == ClimateType.RAINFALL_SUNSHINE_TEMPERATURE) {
+                regionObj.process(lines.get(0), lines.get(1), lines.get(2));
+            } else if (climateType == ClimateType.RAINFALL_SUNSHINE) {
+                regionObj.process(lines.get(0), lines.get(1));
+            } else {
+                regionObj.process(lines.get(0));
+            }
+
+            regions.add(regionObj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            input.close();
+        }
+    }
+    public void displayTable(){
+        System.out.println("Average climatological data for selected locations throughout NZ\n" +
+                "================================================================\n" +
+                "================================================================\n");
+        System.out.print("          Region|");
+        for (String columnName : columnNames) {
+            System.out.printf("%16s|", columnName);
+        }
+        System.out.println();
+        System.out.print("=================");
+        for (String columnName : columnNames) {
+            System.out.print("=================");
+        }
+        System.out.println();
+        for (Region r : regions) {
+            System.out.println(r.toString());
+        }
+    }
 }
 
 public class Main {
