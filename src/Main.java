@@ -1,5 +1,27 @@
+/*
+
+Geoff Ribu
+926605515
+grib784
+
+WEATHER FILE READER
+
+This program takes user input to process yearly weather data stored in .txt files.
+
+The program uses an enum to figure out which data to display in its output and its respective column name.
+The program then uses 3 classes (Rainfall, Sunshine, and Temperature) to process the data stored in a string.
+These 3 classes are all extended from an abstract class "Measurement".
+
+A class named Region uses the 3 data processing classes to store regional weather averages.
+
+Then the Statistics class stores the regional data to output in a readable way for users.
+
+*/
+
+
+
+
 import java.util.*;
-import java.awt.*;
 import java.io.*;
 
 enum ClimateType{
@@ -32,10 +54,12 @@ enum ClimateType{
 abstract class Measurement{
     protected ArrayList<Double> data;
     protected String measurementUnit;
+
     public Measurement(){
         this.data = new ArrayList<>();
         this.measurementUnit = "";
     }
+
     public double getAverage(){
         if (data.isEmpty()) {
             return 0.0;
@@ -48,7 +72,9 @@ abstract class Measurement{
             return sum/data.size();
         }
     }
+
     public abstract void process(String line);
+
     public String toString(){
         return String.format("%.2f%s", getAverage(), measurementUnit);
     }
@@ -60,6 +86,7 @@ class Rainfall extends Measurement{
         measurementUnit = "mm";
         process(measuredRainfall);
     }
+
     @Override
     public void process(String line) {
         String[] dataList = line.split(",");
@@ -77,6 +104,7 @@ class Sunshine extends Measurement{
         measurementUnit = "hr";
         process(measuredSunshine);
     }
+
     @Override
     public void process(String line) {
         String[] dataList = line.split(",");
@@ -92,6 +120,7 @@ class Temperature extends Measurement{
         measurementUnit = "° C";
         process(measuredTemperature);
     }
+
     @Override
     public void process(String line) {
         String[] dataList = line.split("\t");
@@ -104,20 +133,25 @@ class Temperature extends Measurement{
 class Region{
     private String regionName = "UNKNOWN";
     private ArrayList<Measurement> regionData = new ArrayList<>();
+
     public Region(){}
+
     public Region(String regionName){
         this.regionName = regionName;
     }
+
     public void process(String rainfall){
         Rainfall rainfallObj = new Rainfall(rainfall);
         regionData.add(rainfallObj);
     }
+
     public void process(String rainfall, String sunshine) {
         Rainfall rainfallObj = new Rainfall(rainfall);
         Sunshine sunshineObj = new Sunshine(sunshine);
         regionData.add(rainfallObj);
         regionData.add(sunshineObj);
     }
+
     public void process(String rainfall, String sunshine, String minTemperature) {
         Rainfall rainfallObj = new Rainfall(rainfall);
         Sunshine sunshineObj = new Sunshine(sunshine);
@@ -126,6 +160,7 @@ class Region{
         regionData.add(sunshineObj);
         regionData.add(temperatureObj);
     }
+
     public void process(String rainfall, String sunshine, String minTemperature, String maxTemperature) {
         Rainfall rainfallObj = new Rainfall(rainfall);
         Sunshine sunshineObj = new Sunshine(sunshine);
@@ -136,9 +171,11 @@ class Region{
         regionData.add(temperatureObj);
         regionData.add(temperatureObj2);
     }
+
     public double getAverage(int colIndex){
         return regionData.get(colIndex).getAverage();
     }
+
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%16s|", regionName));
@@ -153,11 +190,13 @@ class Statistics {
     private ArrayList<Region> regions;
     private String[] columnNames;
     private ClimateType climateType;
+
     public Statistics(ClimateType climateType){
         this.regions = new ArrayList<>();
         this.climateType = climateType;
         this.columnNames = climateType.getColumnNames();
     }
+
     public void process(String regionDataFileName){
         Scanner input = null;
         try {
@@ -184,6 +223,7 @@ class Statistics {
             input.close();
         }
     }
+
     public void displayTable(){
         System.out.println("Average climatological data for selected locations throughout NZ\n" +
                 "================================================================\n" +
@@ -213,6 +253,23 @@ public class Main {
                 "2 - Rainfall, Sunshine and Minimum Temperature\n" +
                 "3 - All data\n" +
                 "Enter your selection:");
-
+        int userSelection = input.nextInt();
+        Statistics statistics;
+        switch (userSelection) {
+            case 0 -> statistics = new Statistics(ClimateType.RAINFALL);
+            case 1 -> statistics = new Statistics(ClimateType.RAINFALL_SUNSHINE);
+            case 2 -> statistics = new Statistics(ClimateType.RAINFALL_SUNSHINE_TEMPERATURE);
+            case 3 -> statistics = new Statistics(ClimateType.ALL);
+            default -> statistics = new Statistics(ClimateType.ALL);
+        }
+        System.out.println("Enter data file name (Enter 'EXIT' to finish):");
+        String fileNameInput = input.next();
+        while (!fileNameInput.equals("EXIT")){
+            statistics.process(fileNameInput);
+            System.out.println("Enter data file name (Enter 'EXIT' to finish):");
+            fileNameInput = input.next();
+        }
+        System.out.println();
+        statistics.displayTable();
     }
 }
